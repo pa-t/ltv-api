@@ -127,10 +127,6 @@ def preprocess_data(dataset: pd.DataFrame) -> pd.DataFrame:
     targets_total_spent=targets_total_spent
   )
 
-  # Determine if email domain is gmail, yahoo, or other
-  top_domains = domain.value_counts().nlargest(3).index
-  df['domain'] = np.where(df['domain'].isin(top_domains),df['domain'], 'other')
-
   time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(TARGET_WIDTH, 'D')
   customer_window = dataset.groupby('customer_id')['time_stamp'].first() > time_cutoff
   df.drop(df[customer_window].index)
@@ -157,3 +153,8 @@ def preprocess_data(dataset: pd.DataFrame) -> pd.DataFrame:
   df = df.fillna('Other')
 
   return df
+
+
+def preprocess_predict(dataset: pd.DataFrame):
+  # TODO: implement this preprocessing
+  return dataset
