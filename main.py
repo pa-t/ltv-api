@@ -1,8 +1,11 @@
 import logging
-from fastapi import FastAPI, status
+import pandas as pd
+from fastapi import FastAPI, status, File, UploadFile
+from io import BytesIO
 from typing import List
 
 from domain.schemas import RecordSchema, PredictionSchema
+from utils.preprocess import preprocess_data
 
 import random # TODO: delete this
 
@@ -36,5 +39,25 @@ def predict(records: List[RecordSchema]) -> List[PredictionSchema]:
 def train(records: List[RecordSchema]):
   # call the train endpoint from sagemaker
   logger.info(f"records to train on: {records}")
+
+  return
+
+
+@app.post("/model/train-csv", status_code=status.HTTP_204_NO_CONTENT)
+def train_csv(file: UploadFile = File(...)):
+  # read file contents into a BytesIO stream
+  contents = file.file.read()
+  buffer = BytesIO(contents)
+  # convert stream into dataframe
+  df = pd.read_csv(buffer)
+  # clean up file 
+  buffer.close()
+  file.file.close()
+
+  # TODO: do we want to do any validation that the columns are correct?
+
+  df = preprocess_data(dataset=df)
+
+  # call the training endpoint
 
   return
