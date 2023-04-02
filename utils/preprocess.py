@@ -17,14 +17,6 @@ def filter_data(dataset: pd.DataFrame) -> pd.DataFrame:
     (dataset['is_chargeback'] == False) &
     (dataset['is_refund'] == False)
   ]
-  # TODO: we do is_refund == False ^ and then is_refund == True????
-  dataset.loc[
-    (dataset['is_refund'] == True) &
-    (dataset['order_total'] > 0),
-    'order_total'
-  ]  *= -1 #subtract refund totals
-  # TODO: what is this timestamp?
-  dataset = dataset.loc[dataset['time_stamp'] < pd.to_datetime('2022-12-31')]
   total_rev = dataset.groupby('customer_id')['order_total'].sum()
   pos_rev = total_rev[total_rev >= 0]
   dataset = dataset[dataset['customer_id'].isin(pos_rev.index)]
@@ -74,7 +66,7 @@ def drop_overspenders(
   return df
 
 
-def preprocess_data(dataset: pd.DataFrame) -> pd.DataFrame:
+def preprocess_data(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   """
     Series of preprocessing steps, takes raw data from db and prepares it for use
   """
@@ -117,26 +109,22 @@ def preprocess_data(dataset: pd.DataFrame) -> pd.DataFrame:
     'first_on_hold': first_on_hold.astype(str)
   })
 
-  # TODO: where should this come from, the request?
-  TARGET_WIDTH = 365
-
   # drop the overspending accounts
   df = drop_overspenders(
     dataset=df,
-    target_width=TARGET_WIDTH,
+    target_width=target_width,
     targets_total_spent=targets_total_spent
   )
 
-  time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(TARGET_WIDTH, 'D')
+  time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(target_width, 'D')
   customer_window = dataset.groupby('customer_id')['time_stamp'].first() > time_cutoff
   df.drop(df[customer_window].index)
 
   # Add affiliate id and their respective funnel domain (google, bing, email, etc)
-  # TODO: figure out where to get this csv from
-  # afid_df = pd.read_csv('./drive/MyDrive/afid_mapping_ath.csv')
-  # df = pd.merge(df, afid_df, on='afid', how='left').set_index(df.index)
-  # top_sources = df['source_system_description'].value_counts().nlargest(10).index
-  # df['source_system_description'] = np.where(df['source_system_description'].isin(top_sources),df['source_system_description'], 'Other')
+  afid_df = pd.read_csv('./static_data/afid_mapping_ath.csv')
+  df = pd.merge(df, afid_df, on='afid', how='left').set_index(df.index)
+  top_sources = df['source_system_description'].value_counts().nlargest(10).index
+  df['source_system_description'] = np.where(df['source_system_description'].isin(top_sources),df['source_system_description'], 'Other')
 
   # Restrict the afid column to the top 20 values or 'other'
   top_afid = df['afid'].value_counts().nlargest(20).index

@@ -1,0 +1,120 @@
+traffic_source,afid,source_system_description,source_system_name
+Organic,None,Organic,organic
+Microsoft Ads (search) - USA,bing,Microsoft Ads,microsoftads
+Microsoft Ads (search) - USA,bingsr,Microsoft Ads,microsoftads
+Microsoft Ads (search) - USA,bingps,Microsoft Ads,microsoftads
+Microsoft Ads (search) - USA,ms,Microsoft Ads,microsoftads
+Microsoft Ads (search) - Canada,,Microsoft Ads,microsoftads
+Google Ads (search) - USA,gdnuss,Google Ads,googleads
+Google Ads (search) - USA,gdnusr,Google Ads,googleads
+Google Ads (search) - USA,gdnups,Google Ads,googleads
+Google Ads (search) - USA,gdnusssr,Google Ads,googleads
+Google Ads (search) - USA,gdnussps,Google Ads,googleads
+Google Ads (search) - USA,gdnsv,Google Ads,googleads
+Google Ads (search) - USA,gdnussp,Google Ads,googleads
+Google Ads (search) - USA,gdnsr,Google Ads,googleads
+Google Ads (search) - USA,gdnps,Google Ads,googleads
+Google Ads (search) - USA,gdnupsps,Google Ads,googleads
+Google Ads (search) - USA,abgdns,Google Ads,googleads
+Google Ads (search) - USA,gdnusrsr,Google Ads,googleads
+Google Ads (search) - USA,gdnusssrsr,Google Ads,googleads
+Google Ads (search) - USA,gdnussundefined,Google Ads,googleads
+Google Ads (search) - USA,gdndusps,Google Ads,googleads
+Google Ads (search) - USA,gdnupssrsrsrsr,Google Ads,googleads
+Google Ads (display) - USA,gdnu,Google Ads,googleads
+Google Ads (display) - USA,gdn,Google Ads,googleads
+Google Ads (display) - USA,gdnsp,Google Ads,googleads
+Google Ads (display) - USA,gdnu3,Google Ads,googleads
+Google Ads (display) - USA,rtgdnuvc,Google Ads,googleads
+Google Ads (display) - USA,gdnu2,Google Ads,googleads
+Google Ads (display) - USA,abgdnu,Google Ads,googleads
+Google Ads (display) - USA,gdnuv,Google Ads,googleads
+Google Ads (display) - USA,rtgdnuv,Google Ads,googleads
+Google Ads (display) - USA,abyt,Google Ads,googleads
+Google Ads (display) - USA,gdnuundefined,Google Ads,googleads
+Google Ads (display) - USA,gdnup,Google Ads,googleads
+Google Ads (display) - USA,rtgdnu,Google Ads,googleads
+Google Ads (display) - USA,gdnundefined,Google Ads,googleads
+Google Ads (display) - USA,gdnusrsrsr,Google Ads,googleads
+Google Ads (display) - USA,gdnv,Google Ads,googleads
+Google Ads (display) - USA,gdndus,Google Ads,googleads
+Google Ads (search) - Canada,gdncas,Google Ads,googleads
+Google Ads (search) - Canada,gdnmps,Google Ads,googleads
+Google Ads (search) - Canada,ca,Google Ads,googleads
+Google Ads (search) - Canada,gdncassr,Google Ads,googleads
+Google Ads (search) - Canada,gdncaps,Google Ads,googleads
+Google Ads (search) - Canada,gdncasr,Google Ads,googleads
+Google Ads (search) - Canada,gdncasps,Google Ads,googleads
+Google Ads (search) - Canada,gdncasrsr,Google Ads,googleads
+Google Ads (display) - Canada,gdnca,Google Ads,googleads
+Google Ads (display) - Canada,gdndca,Google Ads,googleads
+Google Ads (search) - UK,gdnuks,Google Ads,googleads
+Google Ads (search) - UK,gdnuksps,Google Ads,googleads
+Google Ads (search) - UK,gdnukssr,Google Ads,googleads
+Google Ads (search) - UK,gdnuksr,Google Ads,googleads
+Google Ads (search) - UK,gdnukps,Google Ads,googleads
+Google Ads (display) - UK,,Google Ads,googleads
+Quora Ads (CPC Bidding) - USA,qrus,Quora Ads,quoraads
+Quora Ads (CPC Bidding) - USA,qrusm,Quora Ads,quoraads
+Quora Ads (CPC Bidding) - USA,qrusd,Quora Ads,quoraads
+Quora Ads (CPC Bidding) - USA,qrusron,Quora Ads,quoraads
+Quora Ads (CPC Bidding) - USA,qrus3,Quora Ads,quoraads
+Quora Ads (CPC Bidding) - USA,qrus2,Quora Ads,quoraads
+Quora Ads (CPC Bidding) - USA,qrus4,Quora Ads,quoraads
+Quora Ads (CPA Bidding) - USA,qrusc,Quora Ads,quoraads
+Quora Ads (CPA Bidding) - USA,qruscron,Quora Ads,quoraads
+Quora Ads (CPC Bidding) - Canada,qrca,Quora Ads,quoraads
+Quora Ads (CPA Bidding) - Canada,qrcac,Quora Ads,quoraads
+Quora Ads (CPC Bidding) - UK,qruk,Quora Ads,quoraads
+Quora Ads (CPA Bidding) - UK,qrukc,Quora Ads,quoraads
+Taboola - USA,taboola,Taboola,taboola
+Taboola - USA,tb,Taboola,taboola
+Taboola - USA,bctb,Taboola,taboola
+Taboola - USA,taboola2,Taboola,taboola
+Taboola - USA,rthvtb,Taboola,taboola
+Taboola - USA,rmtb,Taboola,taboola
+Taboola - USA,tbusdtf,Taboola,taboola
+Taboola - USA,tbusmtf,Taboola,taboola
+Taboola - USA,vtb,Taboola,taboola
+Taboola - USA,tbusttf,Taboola,taboola
+Taboola - USA,tbuspd,Taboola,taboola
+Taboola - USA,lahvtb,Taboola,taboola
+Taboola - USA,tbusrt,Taboola,taboola
+Taboola - USA,tbusdww,Taboola,taboola
+Taboola - USA,tbuspt,Taboola,taboola
+Taboola - USA,tbusmww,Taboola,taboola
+Taboola - USA,tbustww,Taboola,taboola
+Taboola - USA,tbuspm,Taboola,taboola
+Taboola - USA,tbusron,Taboola,taboola
+Taboola - Canada,taboolaca,Taboola,taboola
+Facebook - USA,fb,Facebook,facebookads
+Facebook - USA,rtfbcv,Facebook,facebookads
+Facebook - USA,bmfb,Facebook,facebookads
+Facebook - USA,rttbcv,Facebook,facebookads
+Facebook - USA,bcfb,Facebook,facebookads
+Facebook - Canada,fbc,Facebook,facebookads
+Email,bm,Email Traffic,emailtraffic
+Email,bmv,Email Traffic,emailtraffic
+Email,email,Email Traffic,emailtraffic
+Email,bmsr,Email Traffic,emailtraffic
+Email,bmps,Email Traffic,emailtraffic
+Email,vm,Email Traffic,emailtraffic
+Email,bmsrsr,Email Traffic,emailtraffic
+Email,emailsr,Email Traffic,emailtraffic
+Email,bmpsps,Email Traffic,emailtraffic
+LiveIntent - USA,li,LiveIntent,liveintent
+LiveIntent - USA,abli,LiveIntent,liveintent
+LiveIntent - USA,applenews,LiveIntent,liveintent
+Outbrain - USA,ob,Outbrain,outbrain
+Outbrain - USA,outbrain,Outbrain,outbrain
+Outbrain - USA,obbc,Outbrain,outbrain
+Outbrain - USA,rtobcv,Outbrain,outbrain
+PowerInbox - USA,powerinbox,PowerInbox,powerinbox
+PowerInbox - USA,abjg,PowerInbox,powerinbox
+Revcontent - USA,rc,Revcontent,revcontent
+Choozle - USA,choozle,Choozle,choozle
+Taboola - USA,tbusd,Taboola,taboola
+Taboola - Canada,tbcad,Taboola,taboola
+Taboola - UK,tbukd,Taboola,taboola
+Taboola - USA,tbusm,Taboola,taboola
+26,116,12,12
