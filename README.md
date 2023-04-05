@@ -17,5 +17,5 @@ AWS_DEFAULT_REGION=us-east-1
 
 ## Running API locally
 ```
-uvicorn main:app --reload
+uvicorn main:app --reload --log-level info
 ```

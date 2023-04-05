@@ -66,7 +66,7 @@ def drop_overspenders(
   return df
 
 
-def preprocess_data(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
+def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   """
     Series of preprocessing steps, takes raw data from db and prepares it for use
   """
