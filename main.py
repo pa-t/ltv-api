@@ -7,7 +7,8 @@ from keras.models import load_model, save_model
 from starlette.responses import JSONResponse
 
 from domain.enums import ModelTimeFrame
-from utils.preprocess import preprocess_train, preprocess_predict
+from domain.exceptions import MissingColumnsException
+from utils.preprocess import preprocess_train, preprocess_predict, check_columns
 
 app = FastAPI()
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
@@ -26,8 +27,8 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     buffer.close()
     file.file.close()
 
-    # massage the input data to get it ready to use for prediction
-    df = preprocess_predict(dataset=df)
+    # convert historical transaction data into customer profile
+    df = preprocess_predict(dataset=df, target_width=model_time_frame.value)
 
     # TODO: does this need to change bc of diff between sagemaker / our new pipeline
     # drop target column and select which model to use
@@ -43,7 +44,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
       model_path = 'models/month/30model.h5'
       logger.info("Using month ltv model...")
       df = df.drop(columns=['total_spent_30'])
-    
+
     # use keras to load in the correct file
     model = load_model(model_path)
     
@@ -77,35 +78,41 @@ def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Model
     buffer.close()
     file.file.close()
 
-    # TODO: do we want to do any validation that the columns are correct?
-    df = preprocess_train(dataset=df, target_width=int(model_time_frame.value))
-
-    if model_time_frame.value == "365":
-      model_path = 'models/year/365model.h5'
-      logger.info("Using year ltv model...")
-    elif model_time_frame.value == "90":
-      model_path = 'models/quarter/90model.h5'
-      logger.info("Using quarter ltv model...")
+    missing_columns = check_columns(df)
+    if missing_columns:
+      raise MissingColumnsException(missing_columns)
     else:
-      model_path = 'models/month/30model.h5'
-      logger.info("Using month ltv model...")
-    
+      logger.info("All required columns are present in the DataFrame")
+      df = preprocess_train(dataset=df, target_width=int(model_time_frame.value))
 
-    # use keras to load in the correct file
-    model = load_model(model_path)
-    
-    # fit the model to the newly given data
-    model.fit(df)
+      if model_time_frame.value == "365":
+        model_path = 'models/year/365model.h5'
+        logger.info("Using year ltv model...")
+      elif model_time_frame.value == "90":
+        model_path = 'models/quarter/90model.h5'
+        logger.info("Using quarter ltv model...")
+      else:
+        model_path = 'models/month/30model.h5'
+        logger.info("Using month ltv model...")
+      
 
-    # write the model back to the path
-    save_model(model=model, filepath=model_path)
+      # use keras to load in the correct file
+      model = load_model(model_path)
+      
+      # fit the model to the newly given data
+      model.fit(df)
 
-    return JSONResponse(
-      content={
-        'status': 'Training job submitted successfully'
-      }
-    )
+      # write the model back to the path
+      save_model(model=model, filepath=model_path)
+
+      return JSONResponse(
+        content={
+          'status': 'Training job submitted successfully'
+        }
+      )
   except Exception as e:
     ERR_MSG = f'Exception encountered training model: {e}'
     logger.error(ERR_MSG)
     return JSONResponse(content={'status': ERR_MSG}, status_code=500)
+
+

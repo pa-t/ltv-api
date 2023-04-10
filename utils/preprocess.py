@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 from typing import List
 
@@ -36,7 +35,7 @@ def calc_total_spent(dataset: pd.DataFrame) -> List[pd.Series]:
     filtered_dataset = dataset.loc[mask]
 
     # calculate the total amount spent by each customer
-    ltv = filtered_dataset.groupby('customer_id')['order_total'].sum().rename('ltv').astype(float)
+    ltv = filtered_dataset.groupby('customer_id')['order_total'].sum().rename(f'total_spent_{width}').astype(float)
     total_spent.append(ltv)
   
   return total_spent
@@ -48,9 +47,10 @@ def drop_overspenders(
   targets_total_spent: List[pd.Series]
 ) -> pd.DataFrame:
   """
-    Filter out accounts taht spend over the theoretical limit,
+    Filter out accounts that spend over the theoretical limit,
     this is typically an indicator of test accounts
   """
+  threshold = 20
   # select the cutoff amount
   if target_width == 365:
     total_spent = targets_total_spent[2]
@@ -59,7 +59,7 @@ def drop_overspenders(
   else:
     total_spent = targets_total_spent[0]
   
-  total_cutoff = total_spent > target_width + 20
+  total_cutoff = total_spent > target_width + threshold
   total_overspent = total_spent[total_cutoff]
   df = dataset.drop(total_overspent.index)
 
@@ -70,12 +70,22 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   """
     Series of preprocessing steps, takes raw data from db and prepares it for use
   """
-  # convert timestamp column to be datetime object
+  df = get_features(dataset=dataset, target_width=target_width)
+  targets_total_spent = calc_total_spent(dataset=dataset)
+  # drop the overspending accounts
+  df = drop_overspenders(
+    dataset=df,
+    target_width=target_width,
+    targets_total_spent=targets_total_spent
+  )
+  df = df.join(targets_total_spent)
+  return df
+
+
+def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   dataset['time_stamp'] = pd.to_datetime(dataset['time_stamp'])
   # filter out dirty data
   dataset = filter_data(dataset=dataset)
-  # calc total spents
-  targets_total_spent = calc_total_spent(dataset=dataset)
 
   # groupby customer id
   customer_data = dataset.groupby('customer_id')
@@ -90,59 +100,39 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   afid = customer_data['afid'].first().astype(str)
   cc_type = customer_data['cc_type'].first().astype(str)
   main_product_id = customer_data['main_product_id'].first().astype(float)
-  version = customer_data['version'].first().astype(str)
   campaign_id = customer_data['campaign_id'].first().astype(float)
   domain = customer_data['email_address'].first().str.split('@').str[1].astype(str)
-  first_on_hold = customer_data['on_hold'].first()
-
+ 
   df = pd.DataFrame({
     'afid': afid.astype(str),
     'cc_type': cc_type.astype(str),
     'main_product_id': main_product_id.astype(int),
     'campaign_id': campaign_id.astype(int),
     'first_order_amount': first_order_amount.astype(float),
-    'domain': domain.astype(str),
-    'total_spent_30': targets_total_spent[0].astype(float),
-    'total_spent_90': targets_total_spent[1].astype(float),
-    'total_spent_365': targets_total_spent[2].astype(float),
-    'version': version.astype(str),
-    'first_on_hold': first_on_hold.astype(str)
+    'domain': domain.astype(str)
   })
-
-  # drop the overspending accounts
-  df = drop_overspenders(
-    dataset=df,
-    target_width=target_width,
-    targets_total_spent=targets_total_spent
-  )
 
   time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(target_width, 'D')
   customer_window = dataset.groupby('customer_id')['time_stamp'].first() > time_cutoff
   df.drop(df[customer_window].index)
 
-  # Add affiliate id and their respective funnel domain (google, bing, email, etc)
-  afid_df = pd.read_csv('./static_data/afid_mapping_ath.csv')
-  df = pd.merge(df, afid_df, on='afid', how='left').set_index(df.index)
-  top_sources = df['source_system_description'].value_counts().nlargest(10).index
-  df['source_system_description'] = np.where(df['source_system_description'].isin(top_sources),df['source_system_description'], 'Other')
-
-  # Restrict the afid column to the top 20 values or 'other'
-  top_afid = df['afid'].value_counts().nlargest(20).index
-  df['afid'] = np.where(df['afid'].isin(top_afid), df['afid'], 'other')
-
-  # add in billing state column
-  # TODO: figure out where to get this csv from
-  # billing_state = pd.read_csv('./drive/MyDrive/ath_billing_state.csv')
-  # billing_state = billing_state.set_index('customer_id')
-  # billing_state = billing_state.groupby('customer_id').first()
-  # df = df.merge(billing_state, on='customer_id')
-
   # fill na values
   df = df.fillna('Other')
 
   return df
+  
+def preprocess_predict(dataset: pd.DataFrame, target_width: int):
+  df = get_features(dataset=dataset, target_width=target_width)
+  return df
 
+def check_columns(df: pd.DataFrame):
+    required_columns = [
+    'customer_id', 'afid', 'campaign_id', 'cc_type', 'on_hold',
+    'order_total', 'main_product_id', 'email_address','billing_state'
+    ]
 
-def preprocess_predict(dataset: pd.DataFrame):
-  # TODO: implement this preprocessing
-  return dataset
+    missing_columns = [column for column in required_columns if column not in df.columns]
+
+    if missing_columns:
+        return True
+    return False
