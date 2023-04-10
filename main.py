@@ -7,6 +7,7 @@ from keras.models import load_model, save_model
 from starlette.responses import JSONResponse
 
 from domain.enums import ModelTimeFrame
+from domain.exceptions import MissingColumnsException
 from utils.preprocess import preprocess_train, preprocess_predict, check_columns
 
 app = FastAPI()
@@ -43,7 +44,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
       model_path = 'models/month/30model.h5'
       logger.info("Using month ltv model...")
       df = df.drop(columns=['total_spent_30'])
-    
+
     # use keras to load in the correct file
     model = load_model(model_path)
     
@@ -113,7 +114,5 @@ def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Model
     ERR_MSG = f'Exception encountered training model: {e}'
     logger.error(ERR_MSG)
     return JSONResponse(content={'status': ERR_MSG}, status_code=500)
-class MissingColumnsException(Exception):
-    def __init__(self, missing_columns):
-        super().__init__(f"Missing columns: {', '.join(missing_columns)}")
-        self.missing_columns = missing_columns
+
+

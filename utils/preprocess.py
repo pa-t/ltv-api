@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 from typing import List
 
@@ -71,13 +70,19 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   """
     Series of preprocessing steps, takes raw data from db and prepares it for use
   """
-  df = get_features(dataset)
+  df = get_features(dataset=dataset, target_width=target_width)
   targets_total_spent = calc_total_spent(dataset=dataset)
+  # drop the overspending accounts
+  df = drop_overspenders(
+    dataset=df,
+    target_width=target_width,
+    targets_total_spent=targets_total_spent
+  )
   df = df.join(targets_total_spent)
   return df
 
 
-def get_features(dataset:pd.DataFrame) -> pd.DataFrame:
+def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   dataset['time_stamp'] = pd.to_datetime(dataset['time_stamp'])
   # filter out dirty data
   dataset = filter_data(dataset=dataset)
@@ -107,17 +112,9 @@ def get_features(dataset:pd.DataFrame) -> pd.DataFrame:
     'domain': domain.astype(str)
   })
 
-  # drop the overspending accounts
-  df = drop_overspenders(
-    dataset=df,
-    target_width=target_width,
-    targets_total_spent=targets_total_spent
-  )
-
   time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(target_width, 'D')
   customer_window = dataset.groupby('customer_id')['time_stamp'].first() > time_cutoff
   df.drop(df[customer_window].index)
-
 
   # fill na values
   df = df.fillna('Other')
@@ -128,7 +125,7 @@ def preprocess_predict(dataset: pd.DataFrame):
   df = get_features(dataset)
   return df
 
-def check_columns(df: DataFrame):
+def check_columns(df: pd.DataFrame):
     required_columns = [
     'customer_id', 'afid', 'campaign_id', 'cc_type', 'on_hold',
     'order_total', 'main_product_id', 'email_address','billing_state'
