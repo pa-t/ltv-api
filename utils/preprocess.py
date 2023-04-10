@@ -121,8 +121,8 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
 
   return df
   
-def preprocess_predict(dataset: pd.DataFrame):
-  df = get_features(dataset)
+def preprocess_predict(dataset: pd.DataFrame, target_width: int):
+  df = get_features(dataset=dataset, target_width=target_width)
   return df
 
 def check_columns(df: pd.DataFrame):

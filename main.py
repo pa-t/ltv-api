@@ -28,7 +28,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     file.file.close()
 
     # convert historical transaction data into customer profile
-    df = preprocess_predict(dataset=df)
+    df = preprocess_predict(dataset=df, target_width=model_time_frame.value)
 
     # TODO: does this need to change bc of diff between sagemaker / our new pipeline
     # drop target column and select which model to use
