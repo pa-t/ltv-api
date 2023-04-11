@@ -33,7 +33,7 @@ server {
     server_name <IP OF YOUR EC2>;
     location / {
         proxy_pass http://127.0.0.1:8000;
-        client_max_body_size 100M;
+        client_max_body_size 200M;
     }
 }
 ```
@@ -45,7 +45,7 @@ sudo service nginx restart
 
 Run the uvicorn command
 ```
-uvicorn main:app --reload --log-level info
+uvicorn main:app --reload --log-level info &> ./app.log &
 ```
 
 Visit the Public IPv4 address of your EC2 instance, for example:

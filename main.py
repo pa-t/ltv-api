@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 
 from domain.enums import ModelTimeFrame
 from domain.exceptions import MissingColumnsException
-from utils.preprocess import preprocess_train, preprocess_predict, check_columns
+from utils.preprocess import preprocess_train, get_features, check_columns
 
 app = FastAPI()
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
@@ -28,7 +28,8 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     file.file.close()
 
     # convert historical transaction data into customer profile
-    df = preprocess_predict(dataset=df, target_width=model_time_frame.value)
+    logger.info(f"Model time frame: {model_time_frame.value}")
+    df = get_features(dataset=df, target_width=model_time_frame.value)
 
     # drop target column and select which model to use
     if model_time_frame.value == "365":

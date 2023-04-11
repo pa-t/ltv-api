@@ -101,7 +101,6 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   cc_type = customer_data['cc_type'].first().astype(str)
   main_product_id = customer_data['main_product_id'].first().astype(float)
   campaign_id = customer_data['campaign_id'].first().astype(float)
-  domain = customer_data['email_address'].first().str.split('@').str[1].astype(str)
  
   df = pd.DataFrame({
     'afid': afid.astype(str),
@@ -109,7 +108,6 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     'main_product_id': main_product_id.astype(int),
     'campaign_id': campaign_id.astype(int),
     'first_order_amount': first_order_amount.astype(float),
-    'domain': domain.astype(str)
   })
 
   time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(target_width, 'D')
@@ -120,19 +118,15 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   df = df.fillna('Other')
 
   return df
-  
-def preprocess_predict(dataset: pd.DataFrame, target_width: int):
-  df = get_features(dataset=dataset, target_width=target_width)
-  return df
 
 def check_columns(df: pd.DataFrame):
-    required_columns = [
+  required_columns = [
     'customer_id', 'afid', 'campaign_id', 'cc_type', 'on_hold',
-    'order_total', 'main_product_id', 'email_address','billing_state'
-    ]
+    'order_total', 'main_product_id', 'billing_state'
+  ]
 
-    missing_columns = [column for column in required_columns if column not in df.columns]
+  missing_columns = [column for column in required_columns if column not in df.columns]
 
-    if missing_columns:
-        return True
-    return False
+  if missing_columns:
+      return True
+  return False
