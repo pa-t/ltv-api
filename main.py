@@ -30,7 +30,6 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     # convert historical transaction data into customer profile
     df = preprocess_predict(dataset=df, target_width=model_time_frame.value)
 
-    # TODO: does this need to change bc of diff between sagemaker / our new pipeline
     # drop target column and select which model to use
     if model_time_frame.value == "365":
       model_path = 'models/year/365model.h5'
@@ -48,8 +47,6 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     # use keras to load in the correct file
     model = load_model(model_path)
     
-    # TODO: does this work?
-    import pdb;pdb.set_trace()
     # call predict on the model and get the results
     results = model.predict(df)
     
@@ -66,8 +63,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
 
 
 @app.post("/model/train")
-# TODO: make this default to month
-def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = ModelTimeFrame.year):
+def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = ModelTimeFrame.month):
   try:
     # read file contents into a BytesIO stream
     contents = file.file.read()
