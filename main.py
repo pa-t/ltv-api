@@ -28,14 +28,14 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     file.file.close()
 
     # convert historical transaction data into customer profile
-    df = get_features(dataset=df, target_width=model_time_frame.value)
+    df = get_features(dataset=df, target_width=int(model_time_frame.value))
 
     # drop target column and select which model to use
-    if model_time_frame.value == 365:
+    if model_time_frame.value == "365":
       model_path = 'models/year/365model.h5'
       logger.info("Using year ltv model...")
       df = df.drop(columns=['total_spent_365'])
-    elif model_time_frame.value == 90:
+    elif model_time_frame.value == "90":
       model_path = 'models/quarter/90model.h5'
       logger.info("Using quarter ltv model...")
       df = df.drop(columns=['total_spent_90'])
@@ -80,12 +80,12 @@ def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Model
       raise MissingColumnsException(missing_columns)
     else:
       logger.info("All required columns are present in the DataFrame")
-      df = preprocess_train(dataset=df, target_width=model_time_frame.value)
+      df = preprocess_train(dataset=df, target_width=int(model_time_frame.value))
 
-      if model_time_frame.value == 365:
+      if model_time_frame.value == "365":
         model_path = 'models/year/365model.h5'
         logger.info("Using year ltv model...")
-      elif model_time_frame.value == 90:
+      elif model_time_frame.value == "90":
         model_path = 'models/quarter/90model.h5'
         logger.info("Using quarter ltv model...")
       else:
