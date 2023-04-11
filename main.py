@@ -34,21 +34,17 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     if model_time_frame.value == "365":
       model_path = 'models/year/365model.h5'
       logger.info("Using year ltv model...")
-      df = df.drop(columns=['total_spent_365'])
     elif model_time_frame.value == "90":
       model_path = 'models/quarter/90model.h5'
       logger.info("Using quarter ltv model...")
-      df = df.drop(columns=['total_spent_90'])
     else:
       model_path = 'models/month/30model.h5'
       logger.info("Using month ltv model...")
-      df = df.drop(columns=['total_spent_30'])
 
     # use keras to load in the correct file
     model = load_model(model_path)
     
     # call predict on the model and get the results
-    logger.info("model loaded, calling predict...")
     results = model.predict(df)
     
     # construct dataframe with predicted ltv married to customer id
