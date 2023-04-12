@@ -13,13 +13,15 @@ from domain.exceptions import MissingColumnsException
 from utils.preprocess import preprocess_train, get_features, check_columns
 from utils.zltv_model import model_predict, zero_inflated_lognormal_loss
 
+
 app = FastAPI()
+
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
 
 @app.post("/model/predict")
-def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = ModelTimeFrame.month):
+def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame=ModelTimeFrame.month):
   try:
      # read file contents into a BytesIO stream
     contents = file.file.read()
@@ -66,7 +68,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
 
 
 @app.post("/model/train")
-def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = ModelTimeFrame.month):
+def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame=ModelTimeFrame.month):
   try:
     # read file contents into a BytesIO stream
     contents = file.file.read()
@@ -93,7 +95,6 @@ def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Model
       else:
         model_path = 'models/month/30model.h5'
         logger.info("Using month ltv model...")
-      
 
       # use keras to load in the correct file
       model = load_model(model_path, custom_objects={'zero_inflated_lognormal_loss': zero_inflated_lognormal_loss})

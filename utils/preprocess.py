@@ -1,15 +1,14 @@
-import pandas as pd
 import numpy as np
-from utils.zltv_model import feature_dict
-from typing import List
+import pandas as pd
 import pickle
+
+from typing import List
+
+from utils.zltv_model import feature_dict
 
 
 ACCOUNTS_TO_REMOVE = [0, 4, 6, 7, 9, 118483]
-CATEGORICAL_FEATURES = ['afid', 'cc_type', 'main_product_id','campaign_id', 'billing_state']
-NUMERIC_FEATURES = ['first_order_amount']
-TARGET = 'total_spent'
-DAY1_PURCHASEAMT_COL = 'first_order_amount'
+
 
 def filter_data(dataset: pd.DataFrame) -> pd.DataFrame:
   """
@@ -100,18 +99,17 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   for col in all_variables:
     if col not in df.columns:
       raise ValueError(f"Error: {col} column not found in `df`. Please keep all column names identical to the one used while modeling")
-  
-  
+
   df = df[all_variables]
   if df[TARGET_COL].dtype != "float32":
-      df[TARGET_COL] = df[TARGET_COL].astype("float32")
+    df[TARGET_COL] = df[TARGET_COL].astype("float32")
   
   for cat in feature_map["categorical_features"]:
-      levels = list(feature_map[cat].keys())
-      ##Replacing new categorical levels with UNDEFINED
-      df[cat] = df[cat].apply(lambda t: t if t in levels else 'UNDEFINED')
-      # Mappings levels to the corresponding number.
-      df[cat] = df[cat].apply(lambda t: feature_map[cat][t]) 
+    levels = list(feature_map[cat].keys())
+    ##Replacing new categorical levels with UNDEFINED
+    df[cat] = df[cat].apply(lambda t: t if t in levels else 'UNDEFINED')
+    # Mappings levels to the corresponding number.
+    df[cat] = df[cat].apply(lambda t: feature_map[cat][t]) 
 
   x_train=feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
   x_train = { feat: np.array(x_train[feat]) for feat in x_train.keys()}
