@@ -143,7 +143,7 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     'main_product_id': main_product_id.astype(int),
     'campaign_id': campaign_id.astype(int),
     'first_order_amount': first_order_amount.astype(float),
-    'billing_state': billing_state.first().astype(str)
+    'billing_state': billing_state.astype(str)
   })
 
   time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(target_width, 'D')
