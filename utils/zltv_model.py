@@ -89,15 +89,13 @@ def model_predict(model, data, feature_map):
         elif file_type==".parquet":
             data=pd.read_parquet(data, engine='pyarrow')
 
-    all_variables = feature_map["categorical_features"] + feature_map["numerical_features"] + [feature_map["target"], feature_map["day1_purchaseAmt_col"]]
+    all_variables = feature_map["categorical_features"] + feature_map["numerical_features"] + feature_map["day1_purchaseAmt_col"]
 
     for col in all_variables:
         if col not in data.columns:
             raise ValueError(f"Error: {col} column not found in `data`. Please keep all column names identical to the one used while modeling")
  
     data = data[all_variables]
-    if data[feature_map["target"]].dtype != "float32":
-        data[feature_map["target"]] = data[feature_map["target"]].astype("float32")
 
     for cat in feature_map["categorical_features"]:
         levels=list(feature_map[cat].keys())
