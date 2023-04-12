@@ -1,8 +1,15 @@
 import pandas as pd
-
+from utils.zltv_model import model_predict, dnn_model, embedding_layer, embedding_dim, feature_dict
+from utils.zltv_model import preprocess as zltv_preprocess
 from typing import List
+import pickle
+
 
 ACCOUNTS_TO_REMOVE = [0, 4, 6, 7, 9, 118483]
+CATEGORICAL_FEATURES = ['afid', 'cc_type', 'main_product_id','campaign_id', 'billing_state']
+NUMERIC_FEATURES = ['first_order_amount']
+TARGET='total_spent'
+DAY1_PURCHASEAMT_COL='first_order_amount'
 
 def filter_data(dataset: pd.DataFrame) -> pd.DataFrame:
   """
@@ -23,8 +30,11 @@ def filter_data(dataset: pd.DataFrame) -> pd.DataFrame:
   return dataset
 
 
-def calc_total_spent(dataset: pd.DataFrame) -> List[pd.Series]:
-  target_widths = [30, 90, 365]
+def calc_total_spent(dataset: pd.DataFrame, target_width = None) -> List[pd.Series]:
+  if target_width is None:
+    target_widths = [30, 90, 365]
+  else:
+    target_widths = [target_width]
   total_spent = []
   # calculate the cutoff date for each customer
   for width in target_widths:
@@ -71,7 +81,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     Series of preprocessing steps, takes raw data from db and prepares it for use
   """
   df = get_features(dataset=dataset, target_width=target_width)
-  targets_total_spent = calc_total_spent(dataset=dataset)
+  targets_total_spent = calc_total_spent(dataset=dataset, target_width=target_width)
   # drop the overspending accounts
   df = drop_overspenders(
     dataset=df,
@@ -79,7 +89,32 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     targets_total_spent=targets_total_spent
   )
   df = df.join(targets_total_spent)
-  return df
+
+  with open('feature_map.pkl', 'rb') as f:
+    feature_map = pickle.load(f)
+
+  all_variables= feature_map["categorical_features"]+feature_map["numerical_features"]+[feature_map["target"] , feature_map["day1_purchaseAmt_col"]]
+  
+  for col in all_variables:
+      if col not in df.columns:
+          raise ValueError("Error -"+ col +" column not found in `df`. Please keep all column names identical to the one used while modelling ")
+  
+  
+  df=df[all_variables]
+  if df[feature_map["target"]].dtype!="float32":
+      df[feature_map["target"]]=df[feature_map["target"]].astype("float32")
+  
+  for cat in feature_map["categorical_features"]:
+      levels=list(feature_map[cat].keys())
+      ##Replacing new categorical levels with UNDEFINED
+      df[cat] = df[cat].apply( lambda t: t if t in levels else 'UNDEFINED' )
+      # Mappings levels to the corresponding number.
+      df[cat] = df[cat].apply( lambda t: feature_map[cat][t])
+  y0=df[feature_map["day1_purchaseAmt_col"]].values
+
+  x_train=feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
+  x_train = { feat: np.array(x_train[feat]) for feat in x_train.keys()}
+  return x_train, targets_total_spent
 
 
 def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
@@ -116,8 +151,6 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
 
   # fill na values
   df = df.fillna('Other')
-
-  return df
 
 def check_columns(df: pd.DataFrame):
   required_columns = [

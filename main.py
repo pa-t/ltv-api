@@ -10,6 +10,7 @@ from domain.enums import ModelTimeFrame
 from domain.exceptions import MissingColumnsException
 from utils.preprocess import preprocess_train, get_features, check_columns
 
+
 app = FastAPI()
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
