@@ -1,6 +1,6 @@
 import pandas as pd
-from utils.zltv_model import model_predict, dnn_model, embedding_layer, embedding_dim, feature_dict
-from utils.zltv_model import preprocess as zltv_preprocess
+import numpy as np
+from utils.zltv_model import feature_dict
 from typing import List
 import pickle
 
@@ -8,8 +8,8 @@ import pickle
 ACCOUNTS_TO_REMOVE = [0, 4, 6, 7, 9, 118483]
 CATEGORICAL_FEATURES = ['afid', 'cc_type', 'main_product_id','campaign_id', 'billing_state']
 NUMERIC_FEATURES = ['first_order_amount']
-TARGET='total_spent'
-DAY1_PURCHASEAMT_COL='first_order_amount'
+TARGET = 'total_spent'
+DAY1_PURCHASEAMT_COL = 'first_order_amount'
 
 def filter_data(dataset: pd.DataFrame) -> pd.DataFrame:
   """
@@ -90,26 +90,26 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   )
   df = df.join(targets_total_spent)
 
-  with open('feature_map.pkl', 'rb') as f:
+  with open('../static_data/feature_map.pkl', 'rb') as f:
     feature_map = pickle.load(f)
 
-  all_variables= feature_map["categorical_features"]+feature_map["numerical_features"]+[feature_map["target"] , feature_map["day1_purchaseAmt_col"]]
+  all_variables= feature_map["categorical_features"] + feature_map["numerical_features"] + [feature_map["target"], feature_map["day1_purchaseAmt_col"]]
   
   for col in all_variables:
       if col not in df.columns:
-          raise ValueError("Error -"+ col +" column not found in `df`. Please keep all column names identical to the one used while modelling ")
+          raise ValueError(f"Error: {col} column not found in `df`. Please keep all column names identical to the one used while modeling")
   
   
-  df=df[all_variables]
-  if df[feature_map["target"]].dtype!="float32":
-      df[feature_map["target"]]=df[feature_map["target"]].astype("float32")
+  df = df[all_variables]
+  if df[feature_map["target"]].dtype != "float32":
+      df[feature_map["target"]] = df[feature_map["target"]].astype("float32")
   
   for cat in feature_map["categorical_features"]:
-      levels=list(feature_map[cat].keys())
+      levels = list(feature_map[cat].keys())
       ##Replacing new categorical levels with UNDEFINED
-      df[cat] = df[cat].apply( lambda t: t if t in levels else 'UNDEFINED' )
+      df[cat] = df[cat].apply(lambda t: t if t in levels else 'UNDEFINED')
       # Mappings levels to the corresponding number.
-      df[cat] = df[cat].apply( lambda t: feature_map[cat][t]) 
+      df[cat] = df[cat].apply(lambda t: feature_map[cat][t]) 
 
   x_train=feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
   x_train = { feat: np.array(x_train[feat]) for feat in x_train.keys()}

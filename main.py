@@ -1,4 +1,5 @@
 import logging
+import pickle
 import pandas as pd
 
 from fastapi import FastAPI, File, UploadFile
@@ -45,6 +46,9 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
 
     # use keras to load in the correct file
     model = load_model(model_path)
+
+    with open('static_data/feature_map.pkl', 'rb') as f:
+      feature_map = pickle.load(f)
     
     # call predict on the model and get the results
     results = model_predict(model, data=df, feature_map=feature_map)
