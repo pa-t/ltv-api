@@ -89,7 +89,7 @@ def model_predict(model, data, feature_map):
         elif file_type==".parquet":
             data=pd.read_parquet(data, engine='pyarrow')
 
-    all_variables = feature_map["categorical_features"] + feature_map["numerical_features"] + feature_map["day1_purchaseAmt_col"]
+    all_variables = feature_map["categorical_features"] + feature_map["numerical_features"] + [feature_map["day1_purchaseAmt_col"]]
 
     for col in all_variables:
         if col not in data.columns:

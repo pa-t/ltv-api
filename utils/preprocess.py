@@ -90,19 +90,21 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   )
   df = df.join(targets_total_spent)
 
-  with open('../static_data/feature_map.pkl', 'rb') as f:
+  with open('static_data/feature_map.pkl', 'rb') as f:
     feature_map = pickle.load(f)
 
-  all_variables= feature_map["categorical_features"] + feature_map["numerical_features"] + [feature_map["target"], feature_map["day1_purchaseAmt_col"]]
+  TARGET_COL = f"{feature_map['target']}_{target_width}"
+
+  all_variables= feature_map["categorical_features"] + feature_map["numerical_features"] + [TARGET_COL, feature_map["day1_purchaseAmt_col"]]
   
   for col in all_variables:
-      if col not in df.columns:
-          raise ValueError(f"Error: {col} column not found in `df`. Please keep all column names identical to the one used while modeling")
+    if col not in df.columns:
+      raise ValueError(f"Error: {col} column not found in `df`. Please keep all column names identical to the one used while modeling")
   
   
   df = df[all_variables]
-  if df[feature_map["target"]].dtype != "float32":
-      df[feature_map["target"]] = df[feature_map["target"]].astype("float32")
+  if df[TARGET_COL].dtype != "float32":
+      df[TARGET_COL] = df[TARGET_COL].astype("float32")
   
   for cat in feature_map["categorical_features"]:
       levels = list(feature_map[cat].keys())

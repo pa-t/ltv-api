@@ -54,7 +54,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     results = model_predict(model, data=df, feature_map=feature_map)
     
     # construct dataframe with predicted ltv married to customer id
-    results_df = pd.DataFrame({'customer_id': df.customer_id, 'predicted_ltv': results})
+    results_df = pd.DataFrame({'customer_id': df.index, 'predicted_ltv': results.ltv_prediction})
 
     return JSONResponse(
       content={'predictions': results_df.to_dict(orient='records')}
