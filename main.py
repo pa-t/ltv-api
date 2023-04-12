@@ -11,7 +11,7 @@ import tensorflow as tf
 from domain.enums import ModelTimeFrame
 from domain.exceptions import MissingColumnsException
 from utils.preprocess import preprocess_train, get_features, check_columns
-from utils.zltv_model import model_predict
+from utils.zltv_model import model_predict, zero_inflated_lognormal_loss
 
 app = FastAPI()
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
@@ -45,7 +45,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
       logger.info("Using month ltv model...")
 
     # use keras to load in the correct file
-    model = load_model(model_path)
+    model = load_model(model_path, custom_objects={'zero_inflated_lognormal_loss': zero_inflated_lognormal_loss})
 
     with open('static_data/feature_map.pkl', 'rb') as f:
       feature_map = pickle.load(f)
@@ -96,17 +96,23 @@ def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Model
       
 
       # use keras to load in the correct file
-      model = load_model(model_path)
+      model = load_model(model_path, custom_objects={'zero_inflated_lognormal_loss': zero_inflated_lognormal_loss})
       
       # fit the model to the newly given data
       callback_patience = 5
       epochs = 100
-      learning_rate=0.0001
       callbacks = [
-      tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=callback_patience)
-        ]
-      model.fit(x_train, y_train, batch_size=1024, epochs = 100, verbose = 1,
-      callbacks = callbacks)
+        tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=callback_patience)
+      ]
+
+      model.fit(
+        x_train,
+        y_train,
+        batch_size=1024,
+        epochs=epochs,
+        verbose=1,
+        callbacks=callbacks
+      )
 
       # write the model back to the path
       save_model(model=model, filepath=model_path)
