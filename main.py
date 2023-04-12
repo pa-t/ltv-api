@@ -5,11 +5,12 @@ from fastapi import FastAPI, File, UploadFile
 from io import BytesIO
 from keras.models import load_model, save_model
 from starlette.responses import JSONResponse
+import tensorflow as tf
 
 from domain.enums import ModelTimeFrame
 from domain.exceptions import MissingColumnsException
 from utils.preprocess import preprocess_train, get_features, check_columns
-
+from utils.zltv_model import model_predict
 
 app = FastAPI()
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
@@ -46,7 +47,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Mod
     model = load_model(model_path)
     
     # call predict on the model and get the results
-    results = model.predict(df)
+    results = model_predict(model, data=df, feature_map=feature_map)
     
     # construct dataframe with predicted ltv married to customer id
     results_df = pd.DataFrame({'customer_id': df.customer_id, 'predicted_ltv': results})
@@ -77,7 +78,7 @@ def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Model
       raise MissingColumnsException(missing_columns)
     else:
       logger.info("All required columns are present in the DataFrame")
-      df = preprocess_train(dataset=df, target_width=int(model_time_frame.value))
+      x_train, y_train = preprocess_train(dataset=df, target_width=int(model_time_frame.value))
 
       if model_time_frame.value == "365":
         model_path = 'models/year/365model.h5'
@@ -94,7 +95,14 @@ def train(file: UploadFile = File(...), model_time_frame: ModelTimeFrame = Model
       model = load_model(model_path)
       
       # fit the model to the newly given data
-      model.fit(df)
+      callback_patience = 5
+      epochs = 100
+      learning_rate=0.0001
+      callbacks = [
+      tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=callback_patience)
+        ]
+      model.fit(x_train, y_train, batch_size=1024, epochs = 100, verbose = 1,
+      callbacks = callbacks)
 
       # write the model back to the path
       save_model(model=model, filepath=model_path)

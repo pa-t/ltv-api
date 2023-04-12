@@ -109,8 +109,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
       ##Replacing new categorical levels with UNDEFINED
       df[cat] = df[cat].apply( lambda t: t if t in levels else 'UNDEFINED' )
       # Mappings levels to the corresponding number.
-      df[cat] = df[cat].apply( lambda t: feature_map[cat][t])
-  y0=df[feature_map["day1_purchaseAmt_col"]].values
+      df[cat] = df[cat].apply( lambda t: feature_map[cat][t]) 
 
   x_train=feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
   x_train = { feat: np.array(x_train[feat]) for feat in x_train.keys()}
@@ -136,6 +135,7 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   cc_type = customer_data['cc_type'].first().astype(str)
   main_product_id = customer_data['main_product_id'].first().astype(float)
   campaign_id = customer_data['campaign_id'].first().astype(float)
+  billing_state = customer_data['billing_state'].first().astype(str)
  
   df = pd.DataFrame({
     'afid': afid.astype(str),
@@ -143,6 +143,7 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     'main_product_id': main_product_id.astype(int),
     'campaign_id': campaign_id.astype(int),
     'first_order_amount': first_order_amount.astype(float),
+    'billing_state': billing_state.first().astype(str)
   })
 
   time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(target_width, 'D')
@@ -151,6 +152,7 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
 
   # fill na values
   df = df.fillna('Other')
+  return df
 
 def check_columns(df: pd.DataFrame):
   required_columns = [

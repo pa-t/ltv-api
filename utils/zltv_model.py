@@ -112,10 +112,6 @@ def preprocess(data ,target_ltv, day1_purchaseAmt_col="", numerical_features=[] 
         feature_map[col] = {levels[i]: i for i in range(len(levels))}
         data[col] = encoder.transform(data[col])
 
-
-
-    ##We'll need to split the day1 purchase amount column as well to calculate metrics later one. It's not used in training the model
-    y0=data[day1_purchaseAmt_col].values
     
     ##Removing day1_purchaseAmt_col column if its not included in numerical_features
     if day1_purchaseAmt_col not in numerical_features:
@@ -256,7 +252,6 @@ def model_train(model, data, y_train, feature_map, print_performance=False ):
         data[cat] = data[cat].apply( lambda t: t if t in levels else 'UNDEFINED' )
         # Mappings levels to the corresponding number.
         data[cat] = data[cat].apply( lambda t: feature_map[cat][t])
-    y0=data[feature_map["day1_purchaseAmt_col"]].values
 
     x_train=feature_dict(data, feature_map["numerical_features"], feature_map["categorical_features"])
     x_train = { feat: np.array(x_train[feat]) for feat in x_train.keys()}
