@@ -89,10 +89,10 @@ def model_predict(model, data, feature_map):
   ##Reading in data if not a pandas DataFrame
   if isinstance(data, str):
     path, file_type = os.path.splitext(data)
-    if file_type==".csv":
-      data=pd.read_csv(data)
-    elif file_type==".parquet":
-      data=pd.read_parquet(data, engine='pyarrow')
+    if file_type == ".csv":
+      data = pd.read_csv(data)
+    elif file_type == ".parquet":
+      data = pd.read_parquet(data, engine='pyarrow')
 
   all_variables = feature_map["categorical_features"] + feature_map["numerical_features"] + [feature_map["day1_purchaseAmt_col"]]
 
@@ -103,7 +103,7 @@ def model_predict(model, data, feature_map):
   data = data[all_variables]
 
   for cat in feature_map["categorical_features"]:
-    levels=list(feature_map[cat].keys())
+    levels = list(feature_map[cat].keys())
     ##Replacing new categorical levels with UNDEFINED
     data[cat] = data[cat].apply(lambda t: t if t in levels else 'UNDEFINED')
     # Mappings levels to the corresponding number.

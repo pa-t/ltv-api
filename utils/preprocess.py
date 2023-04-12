@@ -94,7 +94,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
 
   TARGET_COL = f"{feature_map['target']}_{target_width}"
 
-  all_variables= feature_map["categorical_features"] + feature_map["numerical_features"] + [TARGET_COL, feature_map["day1_purchaseAmt_col"]]
+  all_variables = feature_map["categorical_features"] + feature_map["numerical_features"] + [TARGET_COL, feature_map["day1_purchaseAmt_col"]]
   
   for col in all_variables:
     if col not in df.columns:
@@ -106,7 +106,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   
   for cat in feature_map["categorical_features"]:
     levels = list(feature_map[cat].keys())
-    ##Replacing new categorical levels with UNDEFINED
+    # Replacing new categorical levels with UNDEFINED
     df[cat] = df[cat].apply(lambda t: t if t in levels else 'UNDEFINED')
     # Mappings levels to the corresponding number.
     df[cat] = df[cat].apply(lambda t: feature_map[cat][t]) 
@@ -153,6 +153,7 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   # fill na values
   df = df.fillna('Other')
   return df
+
 
 def check_columns(df: pd.DataFrame):
   required_columns = [
