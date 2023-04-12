@@ -95,7 +95,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   TARGET_COL = f"{feature_map['target']}_{target_width}"
 
   all_variables = feature_map["categorical_features"] + feature_map["numerical_features"] + [TARGET_COL, feature_map["day1_purchaseAmt_col"]]
-  
+
   for col in all_variables:
     if col not in df.columns:
       raise ValueError(f"Error: {col} column not found in `df`. Please keep all column names identical to the one used while modeling")
@@ -103,7 +103,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
   df = df[all_variables]
   if df[TARGET_COL].dtype != "float32":
     df[TARGET_COL] = df[TARGET_COL].astype("float32")
-  
+
   for cat in feature_map["categorical_features"]:
     if df[cat].dtype == object:
       # if its a string, we need to ignore cases so separate from number columns
@@ -119,9 +119,10 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
       df[cat] = df[cat].apply(lambda t: t if t in levels else 'Other')
       df[cat] = df[cat].apply(lambda t: feature_map[cat][t])
 
-  x_train=feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
+  x_train = feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
   x_train = { feat: np.array(x_train[feat]) for feat in x_train.keys()}
-  return x_train, targets_total_spent
+
+  return x_train, df[TARGET_COL]
 
 
 def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
