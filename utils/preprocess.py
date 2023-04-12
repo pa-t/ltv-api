@@ -105,11 +105,19 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     df[TARGET_COL] = df[TARGET_COL].astype("float32")
   
   for cat in feature_map["categorical_features"]:
-    levels = list(feature_map[cat].keys())
-    # Replacing new categorical levels with UNDEFINED
-    df[cat] = df[cat].apply(lambda t: t if t in levels else 'UNDEFINED')
-    # Mappings levels to the corresponding number.
-    df[cat] = df[cat].apply(lambda t: feature_map[cat][t]) 
+    if df[cat].dtype == object:
+      # if its a string, we need to ignore cases so separate from number columns
+      levels = list(map(lambda x: x.lower() if x is not None else None, feature_map[cat].keys()))
+      # Replacing new categorical levels with Other
+      df[cat] = df[cat].apply(lambda x: x if str(x).lower() in levels else 'Other')
+      # Mappings levels to the corresponding number.
+      lower_feature_map = {k.lower() if k is not None else None: v for k, v in feature_map[cat].items()}
+      df[cat] = df[cat].apply(lambda t: lower_feature_map[t.lower()])
+    else:
+      levels = list(map(lambda x: x, feature_map[cat].keys()))
+      # Replacing new categorical levels with Other
+      df[cat] = df[cat].apply(lambda t: t if t in levels else 'Other')
+      df[cat] = df[cat].apply(lambda t: feature_map[cat][t])
 
   x_train=feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
   x_train = { feat: np.array(x_train[feat]) for feat in x_train.keys()}
