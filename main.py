@@ -49,6 +49,7 @@ def predict(file: UploadFile = File(...), model_time_frame: ModelTimeFrame=Model
     # use keras to load in the correct file
     model = load_model(model_path, compile=False, custom_objects={'zero_inflated_lognormal_loss': zero_inflated_lognormal_loss})
     model.compile(loss=zero_inflated_lognormal_loss)
+
     with open('static_data/feature_map.pkl', 'rb') as f:
       feature_map = pickle.load(f)
     

@@ -7,15 +7,48 @@ conda activate ltv-api
 pip3 install -r requirements.txt
 ```
 
-## AWS Setup
-Need the following ENV VARS for AWS to talk to services:
+## Running API
 ```
-AWS_ACCESS_KEY_ID=<KEY>
-AWS_SECRET_ACCESS_KEY=<SECRET>
-AWS_DEFAULT_REGION=us-east-1
+uvicorn main:app --reload --log-level info
 ```
 
-## Running API locally
+## Setting Up EC2
+- EC2 must have HTTP access from external IPs
+- Clone the repo and follow the above steps
+
+Install nginx
 ```
-uvicorn main:app --reload
+sudo apt install nginx
+```
+
+Create nginx config
+```
+sudo vi /etc/nginx/sites-enabled/fastapi_nginx
+```
+
+Paste the following into the file
+```
+server {
+    listen 80;
+    server_name <IP OF YOUR EC2>;
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        client_max_body_size 200M;
+    }
+}
+```
+
+Restart nginx
+```
+sudo service nginx restart
+```
+
+Run the uvicorn command
+```
+uvicorn main:app --reload --log-level info &> ./app.log &
+```
+
+Visit the Public IPv4 address of your EC2 instance, for example:
+```
+12.345.567.89/docs
 ```
