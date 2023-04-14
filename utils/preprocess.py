@@ -29,12 +29,12 @@ def filter_data(dataset: pd.DataFrame) -> pd.DataFrame:
   return dataset
 
 
-def calc_total_spent(dataset: pd.DataFrame, target_width = None) -> List[pd.Series]:
+def calc_total_spent(dataset: pd.DataFrame, target_width: int = None) -> dict:
   if target_width is None:
     target_widths = [30, 90, 365]
   else:
     target_widths = [target_width]
-  total_spent = []
+  total_spent = {}
   # calculate the cutoff date for each customer
   for width in target_widths:
     cutoffs = dataset.groupby('customer_id')['time_stamp'].min() + pd.Timedelta(days=width)
@@ -45,7 +45,7 @@ def calc_total_spent(dataset: pd.DataFrame, target_width = None) -> List[pd.Seri
 
     # calculate the total amount spent by each customer
     ltv = filtered_dataset.groupby('customer_id')['order_total'].sum().rename(f'total_spent_{width}').astype(float)
-    total_spent.append(ltv)
+    total_spent[width] = ltv
   
   return total_spent
 
@@ -53,7 +53,7 @@ def calc_total_spent(dataset: pd.DataFrame, target_width = None) -> List[pd.Seri
 def drop_overspenders(
   dataset: pd.DataFrame,
   target_width: int,
-  targets_total_spent: List[pd.Series]
+  targets_total_spent: dict
 ) -> pd.DataFrame:
   """
     Filter out accounts that spend over the theoretical limit,
@@ -61,13 +61,7 @@ def drop_overspenders(
   """
   threshold = 20
   # select the cutoff amount
-  if target_width == 365:
-    total_spent = targets_total_spent[2]
-  elif target_width == 90:
-    total_spent = targets_total_spent[1]
-  else:
-    total_spent = targets_total_spent[0]
-  
+  total_spent = targets_total_spent[target_width]
   total_cutoff = total_spent > target_width + threshold
   total_overspent = total_spent[total_cutoff]
   df = dataset.drop(total_overspent.index)
@@ -87,7 +81,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     target_width=target_width,
     targets_total_spent=targets_total_spent
   )
-  df = df.join(targets_total_spent)
+  df = df.join(targets_total_spent.values())
 
   with open('static_data/feature_map.pkl', 'rb') as f:
     feature_map = pickle.load(f)

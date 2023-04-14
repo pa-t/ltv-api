@@ -2,7 +2,7 @@
 
 ## Setup
 ```
-conda create -n 'ltv-api' python=3.9
+conda create -n 'ltv-api' python=3.9 -y
 conda activate ltv-api
 pip3 install -r requirements.txt
 ```
@@ -18,7 +18,7 @@ uvicorn main:app --reload --log-level info
 
 Install nginx
 ```
-sudo apt install nginx
+sudo apt install nginx -y
 ```
 
 Create nginx config
