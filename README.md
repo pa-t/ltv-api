@@ -23,19 +23,16 @@ sudo apt install nginx -y
 
 Create nginx config
 ```
-sudo vi /etc/nginx/sites-enabled/fastapi_nginx
-```
-
-Paste the following into the file
-```
+sudo bash -c 'read -p "Enter the IP of your EC2 instance: " ec2_ip && cat > /etc/nginx/sites-enabled/fastapi_nginx << EOL
 server {
     listen 80;
-    server_name <IP OF YOUR EC2>;
+    server_name $ec2_ip;
     location / {
         proxy_pass http://127.0.0.1:8000;
         client_max_body_size 200M;
     }
 }
+EOL'
 ```
 
 Restart nginx
