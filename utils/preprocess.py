@@ -103,14 +103,14 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
       # if its a string, we need to ignore cases so separate from number columns
       levels = list(map(lambda x: x.lower() if x is not None else None, feature_map[cat].keys()))
       # Replacing new categorical levels with Other
-      df[cat] = df[cat].apply(lambda x: x if str(x).lower() in levels else 'Other')
+      df[cat] = df[cat].apply(lambda x: str(x).lower() if str(x).lower() in levels else 'other')
       # Mappings levels to the corresponding number.
       lower_feature_map = {k.lower() if k is not None else None: v for k, v in feature_map[cat].items()}
       df[cat] = df[cat].apply(lambda t: lower_feature_map[t.lower()])
     else:
       levels = list(map(lambda x: x, feature_map[cat].keys()))
       # Replacing new categorical levels with Other
-      df[cat] = df[cat].apply(lambda t: t if t in levels else 'Other')
+      df[cat] = df[cat].apply(lambda t: t if t in levels else 'other')
       df[cat] = df[cat].apply(lambda t: feature_map[cat][t])
 
   x_train = feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
