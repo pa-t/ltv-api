@@ -112,7 +112,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     else:
       levels = list(map(lambda x: x, feature_map[cat].keys()))
       # Replacing new categorical levels with Other
-      df[cat] = df[cat].apply(lambda t: t if t in levels else 'other')
+      df[cat] = df[cat].apply(lambda t: t if t in levels else -1)
       df[cat] = df[cat].apply(lambda t: feature_map[cat][t])
 
   x_train = feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
