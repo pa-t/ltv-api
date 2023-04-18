@@ -107,14 +107,14 @@ def model_predict(model, data, feature_map):
       # if its a string, we need to ignore cases so separate from number columns
       levels = list(map(lambda x: x.lower() if x is not None else None, feature_map[cat].keys()))
       # Replacing new categorical levels with Other
-      data[cat] = data[cat].apply(lambda x: x if str(x).lower() in levels else 'Other')
+      data[cat] = data[cat].apply(lambda x: str(x).lower() if str(x).lower() in levels else 'other')
       # Mappings levels to the corresponding number.
       lower_feature_map = {k.lower() if k is not None else None: v for k, v in feature_map[cat].items()}
       data[cat] = data[cat].apply(lambda t: lower_feature_map[t.lower()])
     else:
       levels = list(map(lambda x: x, feature_map[cat].keys()))
       # Replacing new categorical levels with Other
-      data[cat] = data[cat].apply(lambda t: t if t in levels else 'Other')
+      data[cat] = data[cat].apply(lambda t: t if t in levels else 'other')
       data[cat] = data[cat].apply(lambda t: feature_map[cat][t])
 
   x_test = feature_dict(data, feature_map["numerical_features"], feature_map["categorical_features"])
