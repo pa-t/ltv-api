@@ -64,9 +64,11 @@ def drop_overspenders(
   total_spent = targets_total_spent[target_width]
   total_cutoff = total_spent > target_width + threshold
   total_overspent = total_spent[total_cutoff]
-  df = dataset.drop(total_overspent.index)
-
-  return df
+  common_indices = total_overspent.index.intersection(dataset.index)
+  if len(common_indices) > 0:
+    return dataset.drop(common_indices)
+  else:
+    return dataset 
 
 
 def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
