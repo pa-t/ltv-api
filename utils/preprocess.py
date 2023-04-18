@@ -148,7 +148,7 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     'first_order_amount': first_order_amount.astype(float),
     'billing_state': billing_state.astype(str)
   })
-
+  import pdb; pdb.set_trace()
   time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(target_width, 'D')
   customer_window = dataset.groupby('customer_id')['time_stamp'].first() > time_cutoff
   df.drop(df[customer_window].index)
