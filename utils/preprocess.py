@@ -29,12 +29,12 @@ def filter_data(dataset: pd.DataFrame) -> pd.DataFrame:
   return dataset
 
 
-def calc_total_spent(dataset: pd.DataFrame, target_width = None) -> List[pd.Series]:
+def calc_total_spent(dataset: pd.DataFrame, target_width: int = None) -> dict:
   if target_width is None:
     target_widths = [30, 90, 365]
   else:
     target_widths = [target_width]
-  total_spent = []
+  total_spent = {}
   # calculate the cutoff date for each customer
   for width in target_widths:
     cutoffs = dataset.groupby('customer_id')['time_stamp'].min() + pd.Timedelta(days=width)
@@ -45,7 +45,7 @@ def calc_total_spent(dataset: pd.DataFrame, target_width = None) -> List[pd.Seri
 
     # calculate the total amount spent by each customer
     ltv = filtered_dataset.groupby('customer_id')['order_total'].sum().rename(f'total_spent_{width}').astype(float)
-    total_spent.append(ltv)
+    total_spent[width] = ltv
   
   return total_spent
 
@@ -53,7 +53,7 @@ def calc_total_spent(dataset: pd.DataFrame, target_width = None) -> List[pd.Seri
 def drop_overspenders(
   dataset: pd.DataFrame,
   target_width: int,
-  targets_total_spent: List[pd.Series]
+  targets_total_spent: dict
 ) -> pd.DataFrame:
   """
     Filter out accounts that spend over the theoretical limit,
@@ -61,18 +61,14 @@ def drop_overspenders(
   """
   threshold = 20
   # select the cutoff amount
-  if target_width == 365:
-    total_spent = targets_total_spent[2]
-  elif target_width == 90:
-    total_spent = targets_total_spent[1]
-  else:
-    total_spent = targets_total_spent[0]
-  
+  total_spent = targets_total_spent[target_width]
   total_cutoff = total_spent > target_width + threshold
   total_overspent = total_spent[total_cutoff]
-  df = dataset.drop(total_overspent.index)
-
-  return df
+  common_indices = total_overspent.index.intersection(dataset.index)
+  if len(common_indices) > 0:
+    return dataset.drop(common_indices)
+  else:
+    return dataset 
 
 
 def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
@@ -87,7 +83,7 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     target_width=target_width,
     targets_total_spent=targets_total_spent
   )
-  df = df.join(targets_total_spent)
+  df = df.join(targets_total_spent.values())
 
   with open('static_data/feature_map.pkl', 'rb') as f:
     feature_map = pickle.load(f)
@@ -109,14 +105,14 @@ def preprocess_train(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
       # if its a string, we need to ignore cases so separate from number columns
       levels = list(map(lambda x: x.lower() if x is not None else None, feature_map[cat].keys()))
       # Replacing new categorical levels with Other
-      df[cat] = df[cat].apply(lambda x: x if str(x).lower() in levels else 'Other')
+      df[cat] = df[cat].apply(lambda x: str(x).lower() if str(x).lower() in levels else 'other')
       # Mappings levels to the corresponding number.
       lower_feature_map = {k.lower() if k is not None else None: v for k, v in feature_map[cat].items()}
       df[cat] = df[cat].apply(lambda t: lower_feature_map[t.lower()])
     else:
       levels = list(map(lambda x: x, feature_map[cat].keys()))
       # Replacing new categorical levels with Other
-      df[cat] = df[cat].apply(lambda t: t if t in levels else 'Other')
+      df[cat] = df[cat].apply(lambda t: t if t in levels else -1)
       df[cat] = df[cat].apply(lambda t: feature_map[cat][t])
 
   x_train = feature_dict(df, feature_map["numerical_features"], feature_map["categorical_features"])
@@ -154,7 +150,6 @@ def get_features(dataset: pd.DataFrame, target_width: int) -> pd.DataFrame:
     'first_order_amount': first_order_amount.astype(float),
     'billing_state': billing_state.astype(str)
   })
-
   time_cutoff = dataset['time_stamp'].max() - pd.Timedelta(target_width, 'D')
   customer_window = dataset.groupby('customer_id')['time_stamp'].first() > time_cutoff
   df.drop(df[customer_window].index)
