@@ -114,7 +114,7 @@ def model_predict(model, data, feature_map):
     else:
       levels = list(map(lambda x: x, feature_map[cat].keys()))
       # Replacing new categorical levels with Other
-      data[cat] = data[cat].apply(lambda t: t if t in levels else 'other')
+      data[cat] = data[cat].apply(lambda t: t if t in levels else -1)
       data[cat] = data[cat].apply(lambda t: feature_map[cat][t])
 
   x_test = feature_dict(data, feature_map["numerical_features"], feature_map["categorical_features"])
